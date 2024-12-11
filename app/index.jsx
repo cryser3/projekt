@@ -1,42 +1,47 @@
 import { Text, View, TextInput, Pressable, StyleSheet, FlatList} from "react-native";
-
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-
-import { data } from "@/data/todos";
+import Ionicons from '@expo/vector-icons/Ionicons';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 
 export default function Index() {
-  const [todos, setTodos] = useState(data.sort((a,b) => b.id - a.id))
-  const [text, setText] = useState('')
+  const [text, setText] = useState('')    //variabel text = initialvärde tom sträng, setText = funktion för uppdatera värdet av text
+  const [todos, setTodos] = useState([])  //variabel todos, initialvärde tom lista
 
+  //lägger till uppgift i listan om inte tom
   const addTodo = () => {
     if (text.trim()){
-      const newId = todos.length > 0 ? todos[0].id + 1 : 1;
-      setTodos([{id: newId, title: text, completed: false}, ...todos])
-      setText('')
+      const newId = todos.length > 0 ? todos[0].id + 1 : 1;     //om listan tom => newId = 1, annars 
+      setTodos([{id: newId, title: text, completed: false}, ...todos])      //lägger in ny uppgift högst upp
+      setText('')                                                           // rensar textfältet
     }
   }
-  //update function
+
+  //togglar en uppgift - klar eller inte
   const toggleTodo = (id) => {
-    setTodos(todos.map(todo => 
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo ))
+    setTodos(todos.map(todo =>                                              //går igenom varje uppgift i todos
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo ))    //om id matchar => skapa nytt objekt med ...todo och vänd completed, annars oförändrat
   }
 
+  //tar bort uppgift från listan
   const removeTodo = (id) => {
-    setTodos(todos.filter(todo => todo.id !== id))
+    setTodos(todos.filter(todo => todo.id !== id))    //filtrerar bort uppgiften med angivna id från listan, skapar ny lista
   }
 
+  //funktion som definerar hur varje uppgift ska visas i listan. Text => titel 
   const renderItem = ({item}) => (
     <View style={styles.todoItem}>
       <Text
-      style={[styles.todoText, item.completed && styles.completedText]}
+      style={[styles.todoText, item.completed && styles.completedTodo]}   //om uppgiften är klar => completedTodo
       onPress={() => toggleTodo(item.id)}
       >
         {item.title}
       </Text>
-      <Pressable onPress={() => removeTodo(item.id)}>
-      <MaterialCommunityIcons name="delete-circle" size={36} color="red" selectable={undefined} />
+      <Pressable 
+      onPress={() => removeTodo(item.id)} 
+      style={styles.removeButton}
+      >
+        <Ionicons name="remove-circle-outline" size={30} color="red" />
       </Pressable>
     </View>
   )
@@ -46,20 +51,19 @@ export default function Index() {
       <View style={styles.inputContainer}>
         <TextInput
         style={styles.input}
-        placeholder="Add a new todo"
-        placeholderTextColor="gray"
+        placeholder="Vad vill du lägga till?"
+        placeholderTextColor="black"
         value = {text}
         onChangeText = {setText}
         />
-          <Pressable onPress={addTodo} style={styles.addButton}>
-            <Text style={styles.addButtonText}>Add</Text>
+          <Pressable onPress={addTodo}>
+            <FontAwesome6 name="add" size={36} color="green" />
           </Pressable>
       </View>
       <FlatList
         data={todos}
         renderItem={renderItem}
         keyExtractor={todo => todo.id}
-        contentContainerStyle={{flexGrow: 1}}
       />
     </SafeAreaView>
   );
@@ -68,58 +72,41 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black'
+    padding: 10,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
     padding: 10,
     width: '100%',
-    maxWidth: 1024,
-    marginHorizontal: 'auto',
-    pointerEvents: 'auto',
+    borderBottomWidth: 1,
   },
   input: {
     flex: 1,
-    borderColor:'gray',
     borderWidth: 1,
     borderRadius: 5,
     padding: 10,
     marginRight: 10,
-    fontSize: 18,
-    minWidth: 0,
-    color: 'white',
-  },
-  addButton: {
-    backgroundColor: 'white',
-    borderRadius: 5,
-    padding: 10,
-  },
-  addButtonText: {
-    fontSize: 18,
-    color: 'black',
+    fontSize: 20,
   },
   todoItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 4,
     padding: 10,
-    borderBottomColor: 'gray',
     borderBottomWidth: 1,
     width: '100%',
-    maxWidth: 1024,
-    marginHorizontal: 'auto',
-    pointerEvents: 'auto',
   },
   todoText: {
     flex: 1,
-    fontSize: 18,
-    color: 'white',
+    fontSize: 20,
   },
-  completedText: {
+  completedTodo: {
     textDecorationLine: 'line-through',
     color: 'gray',
+  },
+  removeButton: {
+    position: 'absolute',
+    right: 10,
   }
 })
